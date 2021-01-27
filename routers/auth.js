@@ -44,18 +44,14 @@ router.post("/auth", async (req, res) => {
   try {
     let username = req.body.username;
     let password = req.body.password;
-    let user = await User.findOne({ username: username });
-    let passwordMatch = password === user.password;
+    if (!username || !password) throw "Missing username or password!";
 
-    if (!username || !password)
-      res.status(400).send({ msg: "Missing username or password!" });
-    else if (!user) res.status(400).send({ msg: "Username doesn't exist!" });
-    else if (!passwordMatch)
-      res.status(400).send({ msg: "Password doesn't match!" });
-    else {
-      let jwt = generateJWT(user);
-      res.status(200).send({ msg: "Success", jwt: jwt });
-    }
+    let user = await User.findOne({ username: username });
+    if (!user) throw "Username doesn't exist!";
+    if (password !== user.password) throw "Password doesn't match!";
+
+    let jwt = generateJWT(user);
+    res.status(200).send({ msg: "Success", jwt: jwt });
   } catch (error) {
     res.status(400).send({ msg: error.toString() });
   }

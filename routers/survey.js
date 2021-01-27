@@ -10,29 +10,13 @@ router.post(
   async (req, res) => {
     try {
       let survey = req.body;
-      let errMsg;
-      if (!survey.title) errMsg = "Missing survey title!";
-      else if (!survey.beginTime || !survey.endTime)
-        errMsg = "Missing begin or end time!";
-      else if (
-        Object.prototype.toString.call(survey.beginTime) !== "[object Date]"
-      )
-        errMsg = "Invalid beginTime";
-      else if (
-        Object.prototype.toString.call(survey.endTime) !== "[object Date]"
-      )
-        errMsg = "Invalid endTime";
-      else if (survey.endTime.valueOf() <= survey.beginTime.valueOf())
-        errMsg = "endTime is eariler than startTime";
-
-      if (errMsg) {
-        res.status(400).send({ msg: errMsg });
-        return;
-      }
+      if (!survey.title) throw "Missing survey title";
+      if (!survey.beginTime) throw "Missing survey begin time";
+      if (!survey.endTime) throw "Missing survey end time";
       survey.authorId = req.user._id;
       survey.modules = [];
       let createdSurvey = await Survey.create(survey);
-      res.status(200).send({ msg: "success", survey: createdSurvey });
+      res.status(200).send(createdSurvey);
     } catch (error) {
       res.status(500).send({ msg: error.toString() });
     }
